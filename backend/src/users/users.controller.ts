@@ -32,6 +32,7 @@ export class UsersController {
             year: user.year,
             registerNumber: user.registerNumber,
             fatherName: user.fatherName,
+            quota: user.quota,
         };
     }
 
@@ -42,5 +43,14 @@ export class UsersController {
             throw new ForbiddenException('Only Admins can assign roles');
         }
         return this.usersService.updateRole(id, role);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Patch(':id/quota')
+    async updateQuota(@Request() req, @Param('id') id: string, @Body('quota') quota: string) {
+        if (req.user.userId !== id && req.user.role !== 'ADMIN') {
+            throw new ForbiddenException('You can only update your own quota');
+        }
+        return this.usersService.updateQuota(id, quota);
     }
 }

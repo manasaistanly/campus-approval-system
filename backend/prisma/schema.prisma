@@ -23,6 +23,7 @@ enum RequestStatus {
   APPROVED
   REJECTED
   CANCELLED
+  PENDING_FEES_VERIFICATION  // After Office fills fees, before Principal's final approval
   READY
 }
 
@@ -42,11 +43,12 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   // Student Profile Fields
-  registerNumber String?   @unique
+  registerNumber String?
   department     String?
   year           String?
   section        String?   // e.g., "A", "B", "C"
   fatherName     String?
+  quota          String?   @default("GOVERNMENT") // "GOVERNMENT" or "MANAGEMENT"
 
   bonafideRequests    BonafideRequest[]
   scholarshipRequests ScholarshipRequest[]
@@ -74,6 +76,16 @@ model BonafideRequest {
   rejectionReason   String?
   qrCodeUrl         String?
   documents         String[]       // Array of file URLs/Paths
+  
+  // Fee Structure (filled by Office)
+  tuitionFees       Float?
+  examFees          Float?
+  hostelFees        Float?
+  booksStationery   Float?
+  laptopPurchase    Float?
+  projectExpenses   Float?
+  certificateDate   DateTime?      // Date when certificate is issued
+  
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
   logs              ApprovalLog[]

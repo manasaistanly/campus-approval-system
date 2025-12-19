@@ -30,6 +30,13 @@ export class UsersService {
         });
     }
 
+    async updateQuota(userId: string, quota: string) {
+        return this.prisma.user.update({
+            where: { id: userId },
+            data: { quota },
+        });
+    }
+
     async findAll() {
         return this.prisma.user.findMany({
             orderBy: { email: 'asc' },

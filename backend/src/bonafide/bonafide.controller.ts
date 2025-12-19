@@ -57,6 +57,12 @@ export class BonafideController {
     }
 
     @UseGuards(AuthGuard('jwt'))
+    @Patch(':id/submit-fees')
+    submitFees(@Request() req, @Param('id') id: string, @Body() fees: any) {
+        return this.bonafideService.submitFees(id, req.user.userId, fees);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
     @Get(':id/download')
     async download(@Request() req, @Param('id') id: string, @Res() res) {
         const buffer = await this.bonafideService.download(id, req.user.userId, req.user.role);

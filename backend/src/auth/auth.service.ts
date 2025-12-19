@@ -50,28 +50,20 @@ export class AuthService {
             throw new ConflictException('User already exists');
         }
 
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const expiresAt = new Date();
-        expiresAt.setMinutes(expiresAt.getMinutes() + 10); // 10 minutes expiry
+        const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit random OTP
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
 
-        // Upsert OTP
         await this.prisma.otpVerification.upsert({
             where: { email },
-            update: {
-                otp,
-                expiresAt,
-                isVerified: false,
-            },
-            create: {
-                email,
-                otp,
-                expiresAt,
-                isVerified: false,
-            },
+            update: { otp, expiresAt, isVerified: false },
+            create: { email, otp, expiresAt, isVerified: false },
         });
 
+        // Send OTP via email (will fallback to console log if SMTP not configured)
         await this.notificationService.sendOtp(email, otp);
-        return { message: 'OTP sent to email' };
+        console.log(`[DEBUG] OTP for ${email}: ${otp}`);
+
+        return { message: 'OTP sent to your email.' };
     }
 
     async verifyEmail(email: string, otp: string) {

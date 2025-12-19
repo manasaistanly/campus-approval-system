@@ -71,7 +71,7 @@ export class BonafideService {
     async findPending(role: Role, userId?: string) {
         const whereClause: any = {
             currentApproverRole: role,
-            status: RequestStatus.PENDING,
+            status: { in: [RequestStatus.PENDING, RequestStatus.PENDING_FEES_VERIFICATION] },
         };
 
         // If Tutor, filter by department and section
@@ -107,25 +107,48 @@ export class BonafideService {
     async approve(id: string, approverId: string, role: Role) {
         const request = await this.prisma.bonafideRequest.findUnique({
             where: { id },
-            include: { student: true } // Include student for email
+            include: { student: true }
         });
         if (!request) throw new Error('Request not found');
+
+        // Handle different statuses based on workflow stage
+        if (role === Role.PRINCIPAL && request.status === RequestStatus.PENDING_FEES_VERIFICATION) {
+            // Principal's second approval (after Office fills fees)
+            const updatedRequest = await this.prisma.bonafideRequest.update({
+                where: { id },
+                data: {
+                    status: RequestStatus.READY,
+                    logs: {
+                        create: {
+                            approverId,
+                            action: 'APPROVED',
+                            remarks: 'Final approval by Principal after fee verification',
+                            roleAtTime: role,
+                            timestamp: new Date(),
+                        },
+                    },
+                },
+            });
+
+            if (request.student.email) {
+                await this.notificationService.notifyReadyForCollection(request.student.email, request.student.fullName);
+            }
+
+            return updatedRequest;
+        }
+
+        // Normal approval flow
         if (request.status !== RequestStatus.PENDING) throw new Error('Request not pending');
         if (request.currentApproverRole !== role) throw new Error('Not authorized to approve at this stage');
 
         const NEXT_ROLE: Partial<Record<Role, Role | null>> = {
             [Role.TUTOR]: Role.HOD,
             [Role.HOD]: Role.PRINCIPAL,
-            [Role.PRINCIPAL]: Role.OFFICE,
-            [Role.OFFICE]: null,
+            [Role.PRINCIPAL]: Role.OFFICE,  // After Principal, goes to Office for fees
         };
 
         const nextRole = NEXT_ROLE[role];
-        let newStatus: RequestStatus = nextRole ? RequestStatus.PENDING : RequestStatus.APPROVED;
-
-        if (!nextRole && request.deliveryMode === DeliveryMode.PHYSICAL) {
-            newStatus = RequestStatus.READY;
-        }
+        const newStatus = nextRole ? RequestStatus.PENDING : RequestStatus.APPROVED;
 
         const updatedRequest = await this.prisma.bonafideRequest.update({
             where: { id },
@@ -144,17 +167,63 @@ export class BonafideService {
             },
         });
 
-        // Notify Student
         if (request.student.email) {
             await this.notificationService.notifyRequestStatus(
                 request.student.email,
                 newStatus,
                 `Your request has been approved by ${role}.`
             );
+        }
 
-            if (newStatus === RequestStatus.READY) {
-                await this.notificationService.notifyReadyForCollection(request.student.email, request.student.fullName);
-            }
+        return updatedRequest;
+    }
+
+    async submitFees(
+        id: string,
+        approverId: string,
+        fees: {
+            tuitionFees: number;
+            examFees: number;
+            hostelFees?: number;
+            booksStationery?: number;
+            laptopPurchase?: number;
+            projectExpenses?: number;
+            certificateDate: Date;
+        }
+    ) {
+        const request = await this.prisma.bonafideRequest.findUnique({
+            where: { id },
+            include: { student: true }
+        });
+
+        if (!request) throw new Error('Request not found');
+        if (request.currentApproverRole !== Role.OFFICE) throw new Error('Not at Office stage');
+        if (request.status !== RequestStatus.PENDING) throw new Error('Request not pending');
+
+        const updatedRequest = await this.prisma.bonafideRequest.update({
+            where: { id },
+            data: {
+                ...fees,
+                status: RequestStatus.PENDING_FEES_VERIFICATION,
+                currentApproverRole: Role.PRINCIPAL,  // Send back to Principal for verification
+                logs: {
+                    create: {
+                        approverId,
+                        action: 'FEES_SUBMITTED',
+                        remarks: 'Fee structure submitted by Office',
+                        roleAtTime: Role.OFFICE,
+                        timestamp: new Date(),
+                    },
+                },
+            },
+        });
+
+        if (request.student.email) {
+            await this.notificationService.notifyRequestStatus(
+                request.student.email,
+                RequestStatus.PENDING_FEES_VERIFICATION,
+                'Fee structure has been prepared and is pending final verification.'
+            );
         }
 
         return updatedRequest;
@@ -198,7 +267,11 @@ export class BonafideService {
         });
 
         if (!request) throw new Error('Request not found');
-        if (request.status !== RequestStatus.APPROVED && request.status !== RequestStatus.READY) throw new Error('Request not approved yet');
+        if (request.status !== RequestStatus.APPROVED &&
+            request.status !== RequestStatus.READY &&
+            request.status !== RequestStatus.PENDING_FEES_VERIFICATION) {
+            throw new Error('Request not approved yet');
+        }
 
         // Allow student (owner) and Office/Principal to download
         if (role === Role.STUDENT && request.studentId !== userId) {
