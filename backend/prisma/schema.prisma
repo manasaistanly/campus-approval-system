@@ -1,0 +1,132 @@
+// backend/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  TUTOR
+  HOD
+  PRINCIPAL
+  OFFICE
+  ADMIN
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+  READY
+}
+
+enum DeliveryMode {
+  PHYSICAL
+  DIGITAL
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  role          Role
+  fullName      String
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Student Profile Fields
+  registerNumber String?   @unique
+  department     String?
+  year           String?
+  section        String?   // e.g., "A", "B", "C"
+  fatherName     String?
+
+  bonafideRequests    BonafideRequest[]
+  scholarshipRequests ScholarshipRequest[]
+  approvalLogs        ApprovalLog[]
+}
+
+model BonafideReason {
+  id        String   @id @default(uuid())
+  reason    String   @unique // e.g., "Internship"
+  category  String   // e.g., "Academic", "Travel", "Financial"
+  isActive  Boolean  @default(true)
+  requests  BonafideRequest[]
+}
+
+model BonafideRequest {
+  id                String         @id @default(uuid())
+  studentId         String
+  student           User           @relation(fields: [studentId], references: [id])
+  deliveryMode      DeliveryMode   @default(PHYSICAL)
+  purposeId         String
+  purpose           BonafideReason @relation(fields: [purposeId], references: [id])
+  formalLetterText  String         @db.Text
+  status            RequestStatus  @default(PENDING)
+  currentApproverRole Role         @default(TUTOR)
+  rejectionReason   String?
+  qrCodeUrl         String?
+  documents         String[]       // Array of file URLs/Paths
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  logs              ApprovalLog[]
+}
+
+model ScholarshipRequest {
+  id                  String         @id @default(uuid())
+  studentId           String
+  student             User           @relation(fields: [studentId], references: [id])
+  scholarshipName     String
+  status              RequestStatus  @default(PENDING)
+  currentApproverRole Role           @default(OFFICE)
+  rejectionReason     String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  feeStructure        FeeStructure?
+  logs                ApprovalLog[]
+}
+
+model FeeStructure {
+  id                    String             @id @default(uuid())
+  scholarshipRequestId  String             @unique
+  scholarshipRequest    ScholarshipRequest @relation(fields: [scholarshipRequestId], references: [id])
+  academicYear          String
+  courseName            String
+  tuitionFee            Decimal
+  examFee               Decimal
+  otherFee              Decimal
+  totalFee              Decimal
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+}
+
+model ApprovalLog {
+  id                  String   @id @default(uuid())
+  bonafideRequestId   String?
+  bonafideRequest     BonafideRequest? @relation(fields: [bonafideRequestId], references: [id])
+  scholarshipRequestId String?
+  scholarshipRequest  ScholarshipRequest? @relation(fields: [scholarshipRequestId], references: [id])
+  approverId          String
+  approver            User     @relation(fields: [approverId], references: [id])
+  action              String   // APPROVED, REJECTED
+  remarks             String?
+  roleAtTime          Role
+  timestamp           DateTime @default(now())
+}
+
+model OtpVerification {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isVerified Boolean @default(false)
+}
