@@ -28,4 +28,14 @@ export class AuthController {
     verifyEmail(@Body('email') email: string, @Body('otp') otp: string) {
         return this.authService.verifyEmail(email, otp);
     }
+
+    @Post('forgot-password')
+    initiateForgotPassword(@Body('email') email: string) {
+        return this.authService.initiateForgotPassword(email);
+    }
+
+    @Post('reset-password')
+    resetPassword(@Body() dto: any) {
+        return this.authService.resetPassword(dto.email, dto.otp, dto.newPassword);
+    }
 }

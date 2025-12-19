@@ -102,6 +102,9 @@ export default function LoginPage() {
                     required
                   />
                 </div>
+                <div className="text-right mt-1">
+                  <Link href="/forgot-password" className="text-xs text-indigo-300 hover:text-indigo-200">Forgot Password?</Link>
+                </div>
               </div>
               <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 {loading ? "Signing In..." : "Sign In"}

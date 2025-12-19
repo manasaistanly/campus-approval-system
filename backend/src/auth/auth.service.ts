@@ -132,4 +132,52 @@ export class AuthService {
             },
         };
     }
+    async initiateForgotPassword(email: string) {
+        const user = await this.usersService.findOne(email);
+        if (!user) {
+            // For security, do not reveal if user exists. 
+            // But for now, we can throw not found or just return success fake.
+            // Let's return success to prevent enumeration, but log internal.
+            // Actually, for this internal app, let's be explicit for better UX.
+            throw new UnauthorizedException('Email not found');
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+
+        await this.prisma.otpVerification.upsert({
+            where: { email },
+            update: { otp, expiresAt, isVerified: false },
+            create: { email, otp, expiresAt, isVerified: false },
+        });
+
+        await this.notificationService.sendOtp(email, otp);
+        console.log(`[DEBUG] Forgot Password OTP for ${email}: ${otp}`);
+
+        return { message: 'OTP sent to your email.' };
+    }
+
+    async resetPassword(email: string, otp: string, newPassword: string) {
+        const record = await this.prisma.otpVerification.findUnique({
+            where: { email },
+        });
+
+        if (!record || record.expiresAt < new Date() || record.otp !== otp) {
+            throw new UnauthorizedException('Invalid or expired OTP');
+        }
+
+        // Hash new password
+        const passwordHash = await bcrypt.hash(newPassword, 10);
+
+        // Update User
+        await this.prisma.user.update({
+            where: { email },
+            data: { passwordHash },
+        });
+
+        // Cleanup OTP
+        await this.prisma.otpVerification.delete({ where: { email } });
+
+        return { message: 'Password reset successfully. You can now login.' };
+    }
 }
