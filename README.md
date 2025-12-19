@@ -76,16 +76,9 @@ A comprehensive digital platform designed to streamline administrative requests 
     - Frontend: `http://localhost:3000`
     - Backend API: `http://localhost:3001`
 
-## 🔑 Default Credentials (Seed Data)
 
-- **Admin**: `manasaistanly0@gmail.com` / `Stanly@231`
-*(Note: Create other users via the Admin Dashboard or Signup page)*
 
-## 🌍 Deployment
 
-- **Frontend**: Deploy to **Vercel** (Zero config).
-- **Backend**: Deploy to **Railway** or **Render**.
-- **Database**: Use a managed PostgreSQL (Railway/Neon).
 
 ## 📄 License
 
