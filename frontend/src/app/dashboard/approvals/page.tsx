@@ -51,11 +51,19 @@ export default function ApprovalsPage() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
-                const data = await res.json();
-                setRequests(data);
+                const contentType = res.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const data = await res.json();
+                    setRequests(data);
+                } else {
+                    const text = await res.text();
+                    console.error("Non-JSON response from /bonafide/pending:", text);
+                }
+            } else {
+                console.error("Failed to fetch approvals:", res.status, res.statusText);
             }
         } catch (err) {
-            console.error("Failed to fetch approvals");
+            console.error("Failed to fetch approvals", err);
         } finally {
             setLoading(false);
         }

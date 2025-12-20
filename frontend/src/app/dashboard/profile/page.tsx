@@ -22,8 +22,16 @@ export default function ProfilePage() {
                     },
                 });
                 if (res.ok) {
-                    const data = await res.json();
-                    setProfile(data);
+                    const contentType = res.headers.get("content-type");
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        const data = await res.json();
+                        setProfile(data);
+                    } else {
+                        const text = await res.text();
+                        console.error("Non-JSON response from /users/profile:", text);
+                    }
+                } else {
+                    console.error("Failed to fetch profile:", res.status, res.statusText);
                 }
             } catch (error) {
                 console.error("Failed to fetch profile", error);
@@ -146,6 +154,10 @@ export default function ProfilePage() {
                                                     setProfile({ ...displayUser, quota: newQuota });
                                                     // Also update local user object context if needed, but displayUser driven by profile state
                                                     alert("Quota updated successfully!");
+                                                } else {
+                                                    const text = await res.text();
+                                                    console.error("Non-JSON/Error response from quota update:", text);
+                                                    alert("Failed to update quota: " + res.status);
                                                 }
                                             } catch (err) {
                                                 console.error("Failed to update quota");

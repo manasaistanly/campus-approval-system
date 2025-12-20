@@ -40,16 +40,24 @@ export default function RequestHistoryPage() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
-                const data = await res.json();
-                // Backend returns all requests for now, ideally we filter by studentId if role is student,
-                // or the specific endpoint handles it (my controller calls findAll, I should update it to filter by user).
-                // Let's assume backend currently returns all but we only show ours if filtering isn't strict yet,
-                // OR better: Update backend controller to use request.user.id for filtering if Student.
-                // For now, let's just display what we get.
-                setRequests(data);
+                const contentType = res.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const data = await res.json();
+                    // Backend returns all requests for now, ideally we filter by studentId if role is student,
+                    // or the specific endpoint handles it (my controller calls findAll, I should update it to filter by user).
+                    // Let's assume backend currently returns all but we only show ours if filtering isn't strict yet,
+                    // OR better: Update backend controller to use request.user.id for filtering if Student.
+                    // For now, let's just display what we get.
+                    setRequests(data);
+                } else {
+                    const text = await res.text();
+                    console.error("Non-JSON response from /bonafide (history):", text);
+                }
+            } else {
+                console.error("Failed to fetch requests:", res.status, res.statusText);
             }
         } catch (err) {
-            console.error("Failed to fetch requests");
+            console.error("Failed to fetch requests", err);
         } finally {
             setLoading(false);
         }

@@ -93,14 +93,28 @@ export default function RegisterPage() {
             });
 
             if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.message || "Registration failed");
+                const contentType = res.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const data = await res.json();
+                    throw new Error(data.message || "Registration failed");
+                } else {
+                    const text = await res.text();
+                    console.error("Non-JSON error response from register:", text);
+                    throw new Error("Registration failed: Server Error " + res.status);
+                }
             }
 
-            const data = await res.json();
-            // Auto login or redirect to login
-            login(data.access_token, data.user);
-            router.push("/dashboard");
+            const contentType = res.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                const data = await res.json();
+                // Auto login or redirect to login
+                login(data.access_token, data.user);
+                router.push("/dashboard");
+            } else {
+                const text = await res.text();
+                console.error("Non-JSON success response from register:", text);
+                throw new Error("Invalid server response format");
+            }
 
         } catch (err: any) {
             setError(err.message);
