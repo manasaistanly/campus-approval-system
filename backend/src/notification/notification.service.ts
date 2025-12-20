@@ -18,6 +18,9 @@ export class NotificationService {
                 },
                 logger: true,
                 debug: true,
+                connectionTimeout: 10000, // 10 seconds timeout
+                greetingTimeout: 10000,
+                socketTimeout: 10000,
             });
             const isSecure = Number(process.env.SMTP_PORT) === 465;
             this.logger.log(`NotificationService initialized: Host=${process.env.SMTP_HOST} Port=${process.env.SMTP_PORT} Secure=${isSecure}`);
