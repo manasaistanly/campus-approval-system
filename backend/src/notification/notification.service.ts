@@ -1,30 +1,40 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Resend } from 'resend';
 
 @Injectable()
 export class NotificationService {
-    private resend: Resend | null = null;
     private readonly logger = new Logger(NotificationService.name);
+    private frontendUrl: string;
+    private emailRelaySecret: string;
 
     constructor() {
-        if (process.env.RESEND_API_KEY) {
-            this.resend = new Resend(process.env.RESEND_API_KEY);
-            this.logger.log('NotificationService initialized with Resend API');
+        this.frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        this.emailRelaySecret = process.env.EMAIL_RELAY_SECRET || '';
+
+        if (this.emailRelaySecret) {
+            this.logger.log(`NotificationService initialized with email relay to: ${this.frontendUrl}`);
         } else {
-            this.logger.warn('RESEND_API_KEY not found. Emails will be mocked (logged to console).');
+            this.logger.warn('EMAIL_RELAY_SECRET not set. Emails will be mocked.');
         }
     }
 
     async sendEmail(to: string, subject: string, text: string) {
-        if (this.resend) {
+        if (this.emailRelaySecret) {
             try {
-                await this.resend.emails.send({
-                    from: 'Bonafide System <onboarding@resend.dev>',
-                    to: [to],
-                    subject,
-                    text,
+                const response = await fetch(`${this.frontendUrl}/api/email-relay`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-secret': this.emailRelaySecret,
+                    },
+                    body: JSON.stringify({ to, subject, text }),
                 });
-                this.logger.log(`Email sent to ${to}`);
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Email relay failed');
+                }
+
+                this.logger.log(`Email sent to ${to} via relay`);
             } catch (error: any) {
                 this.logger.error(`Failed to send email to ${to}`, error.message);
                 throw error;
