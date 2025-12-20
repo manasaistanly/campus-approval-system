@@ -30,8 +30,16 @@ export class NotificationService {
                 });
 
                 if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Email relay failed');
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Email relay failed');
+                    } else {
+                        const text = await response.text();
+                        // Truncate long HTML error pages
+                        const shortText = text.substring(0, 200);
+                        throw new Error(`Email relay failed (${response.status}): ${shortText}`);
+                    }
                 }
 
                 this.logger.log(`Email sent to ${to} via relay`);

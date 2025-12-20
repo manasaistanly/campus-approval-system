@@ -61,8 +61,12 @@ export class AuthService {
 
         console.log(`[DEBUG] OTP for ${email}: ${otp}`);
 
-        // Send OTP via email (will fallback to console log if SMTP not configured)
-        await this.notificationService.sendOtp(email, otp);
+        // Send OTP via email (try/catch so we don't crash if email fails)
+        try {
+            await this.notificationService.sendOtp(email, otp);
+        } catch (error) {
+            console.error(`[WARNING] Failed to send OTP email: ${error.message}`);
+        }
 
         return { message: 'OTP sent to your email.' };
     }
