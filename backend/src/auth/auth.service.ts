@@ -59,9 +59,10 @@ export class AuthService {
             create: { email, otp, expiresAt, isVerified: false },
         });
 
+        console.log(`[DEBUG] OTP for ${email}: ${otp}`);
+
         // Send OTP via email (will fallback to console log if SMTP not configured)
         await this.notificationService.sendOtp(email, otp);
-        console.log(`[DEBUG] OTP for ${email}: ${otp}`);
 
         return { message: 'OTP sent to your email.' };
     }
@@ -151,8 +152,8 @@ export class AuthService {
             create: { email, otp, expiresAt, isVerified: false },
         });
 
-        await this.notificationService.sendOtp(email, otp);
         console.log(`[DEBUG] Forgot Password OTP for ${email}: ${otp}`);
+        await this.notificationService.sendOtp(email, otp);
 
         return { message: 'OTP sent to your email.' };
     }
