@@ -41,8 +41,8 @@ export default function LoginPage() {
           throw new Error(errorData.message || "Invalid credentials");
         } else {
           const text = await res.text();
-          console.error("Non-JSON error response from login:", text);
-          throw new Error("Server error: " + res.status + " " + res.statusText);
+          console.error(`Non-JSON error response from login (${res.url}):`, text);
+          throw new Error(`Server error: ${res.status} ${res.statusText} from ${res.url}`);
         }
       }
 
