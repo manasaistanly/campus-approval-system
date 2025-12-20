@@ -1,49 +1,32 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 @Injectable()
 export class NotificationService {
-    private transporter: nodemailer.Transporter;
+    private resend: Resend | null = null;
     private readonly logger = new Logger(NotificationService.name);
 
     constructor() {
-        if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-            this.transporter = nodemailer.createTransport({
-                host: process.env.SMTP_HOST,
-                port: Number(process.env.SMTP_PORT) || 587,
-                secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
-                auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASS,
-                },
-                logger: true,
-                debug: true,
-                connectionTimeout: 10000, // 10 seconds timeout
-                greetingTimeout: 10000,
-                socketTimeout: 10000,
-                family: 4, // Force IPv4 to prevent timeouts on some cloud providers
-            } as any);
-            const isSecure = Number(process.env.SMTP_PORT) === 465;
-            this.logger.log(`NotificationService initialized: Host=${process.env.SMTP_HOST} Port=${process.env.SMTP_PORT} Secure=${isSecure}`);
+        if (process.env.RESEND_API_KEY) {
+            this.resend = new Resend(process.env.RESEND_API_KEY);
+            this.logger.log('NotificationService initialized with Resend API');
         } else {
-            this.logger.warn('SMTP credentials not found. Emails will be mocked (logged to console).');
+            this.logger.warn('RESEND_API_KEY not found. Emails will be mocked (logged to console).');
         }
     }
 
     async sendEmail(to: string, subject: string, text: string) {
-        if (this.transporter) {
+        if (this.resend) {
             try {
-                await this.transporter.sendMail({
-                    from: process.env.SMTP_FROM || '"Bonafide System" <noreply@bonafide-system.com>',
-                    to,
+                await this.resend.emails.send({
+                    from: 'Bonafide System <onboarding@resend.dev>',
+                    to: [to],
                     subject,
                     text,
                 });
                 this.logger.log(`Email sent to ${to}`);
-            } catch (error) {
-                this.logger.error(`Failed to send email to ${to}`, error.stack);
-                // Fallback or rethrow? Let's verify if we want to block flow.
-                // For OTP, we should probably throw so user knows it failed.
+            } catch (error: any) {
+                this.logger.error(`Failed to send email to ${to}`, error.message);
                 throw error;
             }
         } else {
