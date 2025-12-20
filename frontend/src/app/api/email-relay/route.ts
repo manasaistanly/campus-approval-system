@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+// @ts-ignore
 import nodemailer from 'nodemailer';
 
 // This API route acts as an email relay
