@@ -38,11 +38,20 @@ export default function RequestBonafidePage() {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (res.ok) {
-                    const data = await res.json();
-                    setReasons(data);
+                    const contentType = res.headers.get("content-type");
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        const data = await res.json();
+                        setReasons(data);
+                    } else {
+                        const text = await res.text();
+                        console.error("Non-JSON response from /bonafide/reasons:", text);
+                        // Optional: set empty reasons or show error
+                    }
+                } else {
+                    console.error("Failed to fetch reasons:", res.status, res.statusText);
                 }
             } catch (err) {
-                console.error("Failed to fetch reasons");
+                console.error("Failed to fetch reasons", err);
             } finally {
                 setFetchingReasons(false);
             }
