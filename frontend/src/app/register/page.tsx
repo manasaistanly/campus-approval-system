@@ -39,7 +39,15 @@ export default function RegisterPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email }),
             });
-            if (!res.ok) throw new Error("Failed to send OTP. Email might be in use.");
+            if (!res.ok) {
+                const contentType = res.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const data = await res.json();
+                    throw new Error(data.message || "Failed to send OTP");
+                } else {
+                    throw new Error(`Server Error: ${res.status}`);
+                }
+            }
             setStep(2);
         } catch (err: any) {
             setError(err.message);
