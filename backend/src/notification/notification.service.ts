@@ -19,7 +19,8 @@ export class NotificationService {
                 logger: true,
                 debug: true,
             });
-            this.logger.log('NotificationService initialized with SMTP transport');
+            const isSecure = Number(process.env.SMTP_PORT) === 465;
+            this.logger.log(`NotificationService initialized: Host=${process.env.SMTP_HOST} Port=${process.env.SMTP_PORT} Secure=${isSecure}`);
         } else {
             this.logger.warn('SMTP credentials not found. Emails will be mocked (logged to console).');
         }
