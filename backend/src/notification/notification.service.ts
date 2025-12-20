@@ -22,7 +22,7 @@ export class NotificationService {
                 greetingTimeout: 10000,
                 socketTimeout: 10000,
                 family: 4, // Force IPv4 to prevent timeouts on some cloud providers
-            });
+            } as any);
             const isSecure = Number(process.env.SMTP_PORT) === 465;
             this.logger.log(`NotificationService initialized: Host=${process.env.SMTP_HOST} Port=${process.env.SMTP_PORT} Secure=${isSecure}`);
         } else {
