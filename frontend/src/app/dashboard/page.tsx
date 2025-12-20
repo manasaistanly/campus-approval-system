@@ -19,12 +19,20 @@ export default function DashboardPage() {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (res.ok) {
-                    const data = await res.json();
-                    const total = data.length;
-                    const pending = data.filter((r: any) => r.status === 'PENDING').length;
-                    const approved = data.filter((r: any) => r.status === 'APPROVED' || r.status === 'READY').length;
+                    const contentType = res.headers.get("content-type");
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        const data = await res.json();
+                        const total = data.length;
+                        const pending = data.filter((r: any) => r.status === 'PENDING').length;
+                        const approved = data.filter((r: any) => r.status === 'APPROVED' || r.status === 'READY').length;
 
-                    setCounts({ total, pending, approved });
+                        setCounts({ total, pending, approved });
+                    } else {
+                        const text = await res.text();
+                        console.error("Non-JSON response from /bonafide:", text);
+                    }
+                } else {
+                    console.error("Failed to fetch stats:", res.status, res.statusText);
                 }
             } catch (err) {
                 console.error("Failed to fetch stats");

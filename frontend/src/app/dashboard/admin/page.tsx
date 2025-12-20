@@ -29,8 +29,16 @@ export default function AdminPage() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
-                const data = await res.json();
-                setUsers(data);
+                const contentType = res.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const data = await res.json();
+                    setUsers(data);
+                } else {
+                    const text = await res.text();
+                    console.error("Non-JSON response from /users:", text);
+                }
+            } else {
+                console.error("Failed to fetch users:", res.status, res.statusText);
             }
         } catch (error) {
             console.error("Failed to fetch users", error);

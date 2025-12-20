@@ -35,12 +35,26 @@ export default function LoginPage() {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Invalid credentials");
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || "Invalid credentials");
+        } else {
+          const text = await res.text();
+          console.error("Non-JSON error response from login:", text);
+          throw new Error("Server error: " + res.status + " " + res.statusText);
+        }
       }
 
-      const data = await res.json();
-      login(data.access_token, data.user);
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        const data = await res.json();
+        login(data.access_token, data.user);
+      } else {
+        const text = await res.text();
+        console.error("Non-JSON success response from login:", text);
+        throw new Error("Invalid server response format");
+      }
     } catch (err: any) {
       setError(err.message || "Login failed. Please check your credentials.");
     } finally {
