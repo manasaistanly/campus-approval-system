@@ -12,7 +12,7 @@ async function main() {
         update: {},
         create: {
             email: 'manasaistanly0@gmail.com',
-            passwordHash: await bcrypt.hash('Stanly@231', 10), // User provided password
+            passwordHash: await bcrypt.hash('', 10), // User provided password
             role: Role.ADMIN,
             fullName: 'Manasai Stanly',
         },
