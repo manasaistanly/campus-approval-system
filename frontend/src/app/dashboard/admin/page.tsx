@@ -103,7 +103,7 @@ export default function AdminPage() {
                                             <Select
                                                 defaultValue={user.role}
                                                 onValueChange={(val) => handleRoleChange(user.id, val)}
-                                                disabled={user.email === 'admin@college.edu'} // Prevent editing master admin
+                                                disabled={user.email === 'manasaistanly0@gmail.com'} // Prevent editing master admin
                                             >
                                                 <SelectTrigger className="w-[140px]">
                                                     <SelectValue>{user.role}</SelectValue>

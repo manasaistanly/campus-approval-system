@@ -25,9 +25,6 @@ export default function LoginPage() {
     setError("");
 
     try {
-      // Assuming backend is running on localhost:3000 (NestJS default)
-      // Since we are in dev, we might need a proxy or CORS.
-      // For now, let's assume CORS is enabled on backend.
       const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -94,7 +91,7 @@ export default function LoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="student@college.edu"
+                    placeholder="Enter your gmail"
                     className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-indigo-500 focus:ring-indigo-500 transition-all"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
