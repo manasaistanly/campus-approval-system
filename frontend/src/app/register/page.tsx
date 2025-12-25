@@ -155,7 +155,7 @@ export default function RegisterPage() {
                                     <Label htmlFor="email" className="text-white">College Email</Label>
                                     <div className="relative">
                                         <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                                        <Input id="email" type="email" placeholder="student@college.edu" className="pl-10 bg-white/5 border-white/10 text-white" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                                        <Input id="email" type="email" placeholder="Enter your Gmail" className="pl-10 bg-white/5 border-white/10 text-white" value={email} onChange={(e) => setEmail(e.target.value)} required />
                                     </div>
                                 </div>
                                 <Button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700">{loading ? "Sending Code..." : "Send Verification Code"}</Button>
@@ -211,7 +211,7 @@ export default function RegisterPage() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="fatherName" className="text-white">Father's Name</Label>
-                                    <Input id="fatherName" placeholder="Mr. Suresh Kumar" className="bg-white/5 border-white/10 text-white" value={fatherName} onChange={(e) => setFatherName(e.target.value)} required />
+                                    <Input id="fatherName" placeholder="Enter Father's Name" className="bg-white/5 border-white/10 text-white" value={fatherName} onChange={(e) => setFatherName(e.target.value)} required />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="password" className="text-white">Password</Label>
