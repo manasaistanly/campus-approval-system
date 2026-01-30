@@ -125,7 +125,7 @@ export default function LoginPage() {
           <CardFooter className="flex justify-center">
             <p className="text-xs text-gray-400">
               <Link href="/register" className="text-indigo-300 hover:text-indigo-200 mr-2">Create Account</Link>
-              © 2025 Digital Bonafide System. Secure Access.
+              © 2026 Digital Bonafide System. Secure Access.
             </p>
           </CardFooter>
         </Card>
