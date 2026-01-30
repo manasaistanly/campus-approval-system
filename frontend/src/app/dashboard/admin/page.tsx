@@ -83,46 +83,91 @@ export default function AdminPage() {
                     <CardDescription>Manage user roles and permissions</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="overflow-x-auto">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Email</TableHead>
-                                    <TableHead>Department</TableHead>
-                                    <TableHead>Role</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {users.map((user) => (
-                                    <TableRow key={user.id}>
-                                        <TableCell className="font-medium">{user.fullName}</TableCell>
-                                        <TableCell>{user.email}</TableCell>
-                                        <TableCell>{user.department} {user.section && `(${user.section})`}</TableCell>
-                                        <TableCell>
-                                            <Select
-                                                defaultValue={user.role}
-                                                onValueChange={(val) => handleRoleChange(user.id, val)}
-                                                disabled={user.email === 'manasaistanly0@gmail.com'} // Prevent editing master admin
-                                            >
-                                                <SelectTrigger className="w-[140px]">
-                                                    <SelectValue>{user.role}</SelectValue>
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="STUDENT">Student</SelectItem>
-                                                    <SelectItem value="TUTOR">Tutor</SelectItem>
-                                                    <SelectItem value="HOD">HOD</SelectItem>
-                                                    <SelectItem value="PRINCIPAL">Principal</SelectItem>
-                                                    <SelectItem value="OFFICE">Office</SelectItem>
-                                                    <SelectItem value="ADMIN">Admin</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </TableCell>
+                    <>
+                        {/* Mobile View - Card Layout */}
+                        <div className="md:hidden space-y-4">
+                            {users.map((user) => (
+                                <Card key={user.id}>
+                                    <CardContent className="pt-6">
+                                        <div className="space-y-3">
+                                            <div>
+                                                <p className="font-semibold text-base">{user.fullName}</p>
+                                                <p className="text-sm text-gray-500">{user.email}</p>
+                                            </div>
+                                            <div className="text-sm">
+                                                <p className="text-gray-500">Department</p>
+                                                <p className="font-medium mt-1">
+                                                    {user.department} {user.section && `(${user.section})`}
+                                                </p>
+                                            </div>
+                                            <div className="text-sm">
+                                                <p className="text-gray-500 mb-2">Role</p>
+                                                <Select
+                                                    defaultValue={user.role}
+                                                    onValueChange={(val) => handleRoleChange(user.id, val)}
+                                                    disabled={user.email === 'manasaistanly0@gmail.com'}
+                                                >
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue>{user.role}</SelectValue>
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="STUDENT">Student</SelectItem>
+                                                        <SelectItem value="TUTOR">Tutor</SelectItem>
+                                                        <SelectItem value="HOD">HOD</SelectItem>
+                                                        <SelectItem value="PRINCIPAL">Principal</SelectItem>
+                                                        <SelectItem value="OFFICE">Office</SelectItem>
+                                                        <SelectItem value="ADMIN">Admin</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+
+                        {/* Desktop View - Table Layout */}
+                        <div className="hidden md:block overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>Email</TableHead>
+                                        <TableHead>Department</TableHead>
+                                        <TableHead>Role</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
+                                </TableHeader>
+                                <TableBody>
+                                    {users.map((user) => (
+                                        <TableRow key={user.id}>
+                                            <TableCell className="font-medium">{user.fullName}</TableCell>
+                                            <TableCell>{user.email}</TableCell>
+                                            <TableCell>{user.department} {user.section && `(${user.section})`}</TableCell>
+                                            <TableCell>
+                                                <Select
+                                                    defaultValue={user.role}
+                                                    onValueChange={(val) => handleRoleChange(user.id, val)}
+                                                    disabled={user.email === 'manasaistanly0@gmail.com'} // Prevent editing master admin
+                                                >
+                                                    <SelectTrigger className="w-[140px]">
+                                                        <SelectValue>{user.role}</SelectValue>
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="STUDENT">Student</SelectItem>
+                                                        <SelectItem value="TUTOR">Tutor</SelectItem>
+                                                        <SelectItem value="HOD">HOD</SelectItem>
+                                                        <SelectItem value="PRINCIPAL">Principal</SelectItem>
+                                                        <SelectItem value="OFFICE">Office</SelectItem>
+                                                        <SelectItem value="ADMIN">Admin</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </>
                 </CardContent>
             </Card>
         </div>

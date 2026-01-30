@@ -168,7 +168,7 @@ export default function RegisterPage() {
                                     <Label htmlFor="otp" className="text-white">Verification Code</Label>
                                     <div className="relative">
                                         <CheckCircle className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                                        <Input id="otp" type="text" placeholder="123456" className="pl-10 bg-white/5 border-white/10 text-white" value={otp} onChange={(e) => setOtp(e.target.value)} required />
+                                        <Input id="otp" type="text" placeholder="Enter the code" className="pl-10 bg-white/5 border-white/10 text-white" value={otp} onChange={(e) => setOtp(e.target.value)} required />
                                     </div>
                                 </div>
                                 <Button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700">{loading ? "Verifying..." : "Verify Code"}</Button>
@@ -186,20 +186,20 @@ export default function RegisterPage() {
                                     <Label htmlFor="fullName" className="text-white">Full Name</Label>
                                     <div className="relative">
                                         <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                                        <Input id="fullName" placeholder="Rajesh Kumar" className="pl-10 bg-white/5 border-white/10 text-white" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                                        <Input id="fullName" placeholder="Full Name" className="pl-10 bg-white/5 border-white/10 text-white" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="registerNumber" className="text-white">Register Number</Label>
-                                        <Input id="registerNumber" placeholder="CSE2021001" className="bg-white/5 border-white/10 text-white" value={registerNumber} onChange={(e) => setRegisterNumber(e.target.value)} required />
+                                        <Input id="registerNumber" placeholder="24036176104..." className="bg-white/5 border-white/10 text-white" value={registerNumber} onChange={(e) => setRegisterNumber(e.target.value)} required />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="year" className="text-white">Year</Label>
                                         <Input id="year" placeholder="3" className="bg-white/5 border-white/10 text-white" value={year} onChange={(e) => setYear(e.target.value)} required />
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="department" className="text-white">Department</Label>
                                         <Input id="department" placeholder="CSE" className="bg-white/5 border-white/10 text-white" value={department} onChange={(e) => setDepartment(e.target.value)} required />

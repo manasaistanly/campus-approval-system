@@ -91,43 +91,39 @@ export default function RequestHistoryPage() {
                             <p>No requests found.</p>
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Reason</TableHead>
-                                        <TableHead>Category</TableHead>
-                                        <TableHead>Mode</TableHead>
-                                        <TableHead>Submitted On</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Current Stage</TableHead>
-                                        <TableHead>Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {requests.map((req) => (
-                                        <TableRow key={req.id}>
-                                            <TableCell className="font-medium">{req.purpose.reason}</TableCell>
-                                            <TableCell>{req.purpose.category}</TableCell>
-                                            <TableCell><Badge variant="outline">{req.deliveryMode}</Badge></TableCell>
-                                            <TableCell>{new Date(req.createdAt).toLocaleDateString()}</TableCell>
-                                            <TableCell>
-                                                <Badge className={getStatusColor(req.status)}>{req.status}</Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                {req.status === 'PENDING' ? (
-                                                    <span className="text-sm text-gray-600 font-medium">
-                                                        Waiting for {req.currentApproverRole}
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-sm text-gray-600">-</span>
+                        <>
+                            {/* Mobile View - Card Layout */}
+                            <div className="md:hidden space-y-4">
+                                {requests.map((req) => (
+                                    <Card key={req.id}>
+                                        <CardContent className="pt-6">
+                                            <div className="space-y-3">
+                                                <div className="flex items-start justify-between">
+                                                    <div>
+                                                        <p className="font-semibold text-base">{req.purpose.reason}</p>
+                                                        <p className="text-sm text-gray-500">{req.purpose.category}</p>
+                                                    </div>
+                                                    <Badge className={getStatusColor(req.status)}>{req.status}</Badge>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-2 text-sm">
+                                                    <div>
+                                                        <p className="text-gray-500">Mode</p>
+                                                        <Badge variant="outline" className="mt-1">{req.deliveryMode}</Badge>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500">Submitted</p>
+                                                        <p className="font-medium mt-1">{new Date(req.createdAt).toLocaleDateString()}</p>
+                                                    </div>
+                                                </div>
+                                                {req.status === 'PENDING' && (
+                                                    <div className="text-sm">
+                                                        <p className="text-gray-500">Current Stage</p>
+                                                        <p className="font-medium text-gray-800">Waiting for {req.currentApproverRole}</p>
+                                                    </div>
                                                 )}
-                                            </TableCell>
-                                            <TableCell>
                                                 {(req.status === 'APPROVED' || req.status === 'READY') && req.deliveryMode === 'DIGITAL' && (
-                                                    <Button variant="outline" size="sm" className="gap-2" onClick={() => {
+                                                    <Button variant="outline" size="sm" className="w-full gap-2" onClick={() => {
                                                         const token = localStorage.getItem("token");
-                                                        // We need to fetch with auth token to download
                                                         fetch(`${API_BASE_URL}/bonafide/${req.id}/download`, {
                                                             headers: { Authorization: `Bearer ${token}` }
                                                         })
@@ -150,16 +146,87 @@ export default function RequestHistoryPage() {
                                                     </Button>
                                                 )}
                                                 {req.status === 'READY' && req.deliveryMode === 'PHYSICAL' && (
-                                                    <span className="text-blue-600 font-bold text-xs flex items-center gap-1">
-                                                        <Clock className="w-3 h-3" /> Ready for Collection
-                                                    </span>
+                                                    <div className="bg-blue-50 border border-blue-200 rounded-md p-3 flex items-center gap-2">
+                                                        <Clock className="w-4 h-4 text-blue-600" />
+                                                        <span className="text-blue-700 font-semibold text-sm">Ready for Collection</span>
+                                                    </div>
                                                 )}
-                                            </TableCell>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+
+                            {/* Desktop View - Table Layout */}
+                            <div className="hidden md:block overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Reason</TableHead>
+                                            <TableHead>Category</TableHead>
+                                            <TableHead>Mode</TableHead>
+                                            <TableHead>Submitted On</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead>Current Stage</TableHead>
+                                            <TableHead>Actions</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {requests.map((req) => (
+                                            <TableRow key={req.id}>
+                                                <TableCell className="font-medium">{req.purpose.reason}</TableCell>
+                                                <TableCell>{req.purpose.category}</TableCell>
+                                                <TableCell><Badge variant="outline">{req.deliveryMode}</Badge></TableCell>
+                                                <TableCell>{new Date(req.createdAt).toLocaleDateString()}</TableCell>
+                                                <TableCell>
+                                                    <Badge className={getStatusColor(req.status)}>{req.status}</Badge>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {req.status === 'PENDING' ? (
+                                                        <span className="text-sm text-gray-600 font-medium">
+                                                            Waiting for {req.currentApproverRole}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-sm text-gray-600">-</span>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {(req.status === 'APPROVED' || req.status === 'READY') && req.deliveryMode === 'DIGITAL' && (
+                                                        <Button variant="outline" size="sm" className="gap-2" onClick={() => {
+                                                            const token = localStorage.getItem("token");
+                                                            fetch(`${API_BASE_URL}/bonafide/${req.id}/download`, {
+                                                                headers: { Authorization: `Bearer ${token}` }
+                                                            })
+                                                                .then(response => {
+                                                                    if (response.ok) return response.blob();
+                                                                    throw new Error('Download failed');
+                                                                })
+                                                                .then(blob => {
+                                                                    const url = window.URL.createObjectURL(blob);
+                                                                    const a = document.createElement('a');
+                                                                    a.href = url;
+                                                                    a.download = "bonafide.pdf";
+                                                                    document.body.appendChild(a);
+                                                                    a.click();
+                                                                    a.remove();
+                                                                })
+                                                                .catch(e => alert(e.message));
+                                                        }}>
+                                                            <QrCode className="h-4 w-4" /> Download PDF
+                                                        </Button>
+                                                    )}
+                                                    {req.status === 'READY' && req.deliveryMode === 'PHYSICAL' && (
+                                                        <span className="text-blue-600 font-bold text-xs flex items-center gap-1">
+                                                            <Clock className="w-3 h-3" /> Ready for Collection
+                                                        </span>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </>
                     )}
                 </CardContent>
             </Card>

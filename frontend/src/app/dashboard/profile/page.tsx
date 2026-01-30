@@ -50,18 +50,18 @@ export default function ProfilePage() {
     const displayUser = profile || user;
 
     return (
-        <div className="space-y-6">
-            <h2 className="text-3xl font-bold tracking-tight">My Profile</h2>
+        <div className="space-y-4 sm:space-y-6">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">My Profile</h2>
 
             <Card>
-                <CardHeader className="flex flex-row items-center gap-4">
-                    <Avatar className="h-20 w-20">
+                <CardHeader className="flex flex-col sm:flex-row items-center gap-4">
+                    <Avatar className="h-16 w-16 sm:h-20 sm:w-20">
                         <AvatarImage src={`https://ui-avatars.com/api/?name=${displayUser.fullName}`} alt={displayUser.fullName} />
                         <AvatarFallback>{displayUser.fullName?.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <div>
-                        <CardTitle>{displayUser.fullName}</CardTitle>
-                        <CardDescription>{displayUser.email}</CardDescription>
+                    <div className="text-center sm:text-left">
+                        <CardTitle className="text-xl sm:text-2xl">{displayUser.fullName}</CardTitle>
+                        <CardDescription className="text-sm">{displayUser.email}</CardDescription>
                         <div className="mt-2">
                             <Badge>{displayUser.role}</Badge>
                         </div>
@@ -131,13 +131,13 @@ export default function ProfilePage() {
                             <div className="flex items-center text-sm font-medium text-muted-foreground">
                                 <Shield className="mr-2 h-4 w-4" /> Quota
                             </div>
-                            <div className="flex items-center gap-4">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
                                 <div className="text-sm font-semibold text-blue-600 border rounded px-3 py-1 bg-blue-50">
                                     {displayUser.quota || "GOVERNMENT"}
                                 </div>
                                 {displayUser.id === user?.id && (
                                     <select
-                                        className="border rounded px-2 py-1 text-sm bg-background cursor-pointer"
+                                        className="border rounded px-3 py-2 text-sm bg-background cursor-pointer w-full sm:w-auto min-h-[44px]"
                                         value={displayUser.quota || "GOVERNMENT"}
                                         onChange={async (e) => {
                                             const newQuota = e.target.value;

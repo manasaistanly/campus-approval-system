@@ -135,52 +135,58 @@ export default function ApprovalsPage() {
                             <p>All caught up! No pending requests.</p>
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Student</TableHead>
-                                        <TableHead>Department</TableHead>
-                                        <TableHead>Purpose</TableHead>
-                                        <TableHead>Letter</TableHead>
-                                        <TableHead>Submitted</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {requests.map((req) => (
-                                        <TableRow key={req.id}>
-                                            <TableCell>
+                        <>
+                            {/* Mobile View - Card Layout */}
+                            <div className="md:hidden space-y-4">
+                                {requests.map((req) => (
+                                    <Card key={req.id}>
+                                        <CardContent className="pt-6">
+                                            <div className="space-y-4">
+                                                {/* Student Info */}
                                                 <div>
-                                                    <p className="font-medium">{req.student.fullName}</p>
-                                                    <p className="text-xs text-gray-500">{req.student.registerNumber}</p>
+                                                    <p className="font-semibold text-base">{req.student.fullName}</p>
+                                                    <p className="text-sm text-gray-500">{req.student.registerNumber}</p>
+                                                    <p className="text-sm text-gray-600 mt-1">
+                                                        {req.student.department} - Year {req.student.year}
+                                                    </p>
                                                 </div>
-                                            </TableCell>
-                                            <TableCell>{req.student.department} - Year {req.student.year}</TableCell>
-                                            <TableCell>{req.purpose.reason}</TableCell>
-                                            <TableCell>
+
+                                                {/* Purpose & Date */}
+                                                <div className="grid grid-cols-2 gap-2 text-sm">
+                                                    <div>
+                                                        <p className="text-gray-500">Purpose</p>
+                                                        <p className="font-medium mt-1">{req.purpose.reason}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500">Submitted</p>
+                                                        <p className="font-medium mt-1">{new Date(req.createdAt).toLocaleDateString()}</p>
+                                                    </div>
+                                                </div>
+
+                                                {/* View Letter Button */}
                                                 <Dialog>
                                                     <DialogTrigger asChild>
-                                                        <Button variant="ghost" size="sm"><Eye className="h-4 w-4 mr-1" /> View</Button>
+                                                        <Button variant="outline" size="sm" className="w-full">
+                                                            <Eye className="h-4 w-4 mr-2" /> View Letter
+                                                        </Button>
                                                     </DialogTrigger>
-                                                    <DialogContent>
+                                                    <DialogContent className="max-w-[90vw] sm:max-w-lg">
                                                         <DialogHeader>
                                                             <DialogTitle>Formal Letter</DialogTitle>
                                                             <DialogDescription>Submitted by {req.student.fullName}</DialogDescription>
                                                         </DialogHeader>
-                                                        <div className="p-4 bg-muted rounded-md whitespace-pre-wrap text-sm">
+                                                        <div className="p-4 bg-muted rounded-md whitespace-pre-wrap text-sm max-h-[60vh] overflow-y-auto">
                                                             {req.formalLetterText}
                                                         </div>
                                                     </DialogContent>
                                                 </Dialog>
-                                            </TableCell>
-                                            <TableCell>{new Date(req.createdAt).toLocaleDateString()}</TableCell>
-                                            <TableCell className="text-right space-x-2">
-                                                {/* Preview PDF Button - Only during fee verification (2nd approval) */}
+
+                                                {/* Preview PDF for Principal */}
                                                 {user?.role === "PRINCIPAL" && req.status === "PENDING_FEES_VERIFICATION" && (
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
+                                                        className="w-full"
                                                         onClick={async () => {
                                                             try {
                                                                 const token = localStorage.getItem("token");
@@ -201,43 +207,159 @@ export default function ApprovalsPage() {
                                                     </Button>
                                                 )}
 
-                                                <Button
-                                                    variant="default"
-                                                    className="bg-green-600 hover:bg-green-700"
-                                                    size="sm"
-                                                    onClick={() => handleApprove(req.id)}
-                                                    disabled={processing === req.id}
-                                                >
-                                                    {processing === req.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Approve"}
-                                                </Button>
+                                                {/* Action Buttons */}
+                                                <div className="flex flex-col gap-2">
+                                                    <Button
+                                                        variant="default"
+                                                        className="bg-green-600 hover:bg-green-700 w-full"
+                                                        size="sm"
+                                                        onClick={() => handleApprove(req.id)}
+                                                        disabled={processing === req.id}
+                                                    >
+                                                        {processing === req.id ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                                        Approve
+                                                    </Button>
 
-                                                <Dialog>
-                                                    <DialogTrigger asChild>
-                                                        <Button variant="destructive" size="sm" disabled={processing === req.id}>Reject</Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent>
-                                                        <DialogHeader>
-                                                            <DialogTitle>Reject Request</DialogTitle>
-                                                            <DialogDescription>Please provide a reason for rejection.</DialogDescription>
-                                                        </DialogHeader>
-                                                        <Textarea
-                                                            placeholder="Reason for rejection..."
-                                                            value={rejectReason}
-                                                            onChange={(e) => setRejectReason(e.target.value)}
-                                                        />
-                                                        <DialogFooter>
-                                                            <Button variant="destructive" onClick={() => handleReject(req.id)} disabled={!rejectReason || processing === req.id}>
-                                                                Confirm Rejection
+                                                    <Dialog>
+                                                        <DialogTrigger asChild>
+                                                            <Button variant="destructive" size="sm" className="w-full" disabled={processing === req.id}>
+                                                                Reject
                                                             </Button>
-                                                        </DialogFooter>
-                                                    </DialogContent>
-                                                </Dialog>
-                                            </TableCell>
+                                                        </DialogTrigger>
+                                                        <DialogContent className="max-w-[90vw] sm:max-w-lg">
+                                                            <DialogHeader>
+                                                                <DialogTitle>Reject Request</DialogTitle>
+                                                                <DialogDescription>Please provide a reason for rejection.</DialogDescription>
+                                                            </DialogHeader>
+                                                            <Textarea
+                                                                placeholder="Reason for rejection..."
+                                                                value={rejectReason}
+                                                                onChange={(e) => setRejectReason(e.target.value)}
+                                                            />
+                                                            <DialogFooter>
+                                                                <Button
+                                                                    variant="destructive"
+                                                                    onClick={() => handleReject(req.id)}
+                                                                    disabled={!rejectReason || processing === req.id}
+                                                                    className="w-full sm:w-auto"
+                                                                >
+                                                                    Confirm Rejection
+                                                                </Button>
+                                                            </DialogFooter>
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+
+                            {/* Desktop View - Table Layout */}
+                            <div className="hidden md:block overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Student</TableHead>
+                                            <TableHead>Department</TableHead>
+                                            <TableHead>Purpose</TableHead>
+                                            <TableHead>Letter</TableHead>
+                                            <TableHead>Submitted</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {requests.map((req) => (
+                                            <TableRow key={req.id}>
+                                                <TableCell>
+                                                    <div>
+                                                        <p className="font-medium">{req.student.fullName}</p>
+                                                        <p className="text-xs text-gray-500">{req.student.registerNumber}</p>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>{req.student.department} - Year {req.student.year}</TableCell>
+                                                <TableCell>{req.purpose.reason}</TableCell>
+                                                <TableCell>
+                                                    <Dialog>
+                                                        <DialogTrigger asChild>
+                                                            <Button variant="ghost" size="sm"><Eye className="h-4 w-4 mr-1" /> View</Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent>
+                                                            <DialogHeader>
+                                                                <DialogTitle>Formal Letter</DialogTitle>
+                                                                <DialogDescription>Submitted by {req.student.fullName}</DialogDescription>
+                                                            </DialogHeader>
+                                                            <div className="p-4 bg-muted rounded-md whitespace-pre-wrap text-sm">
+                                                                {req.formalLetterText}
+                                                            </div>
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                </TableCell>
+                                                <TableCell>{new Date(req.createdAt).toLocaleDateString()}</TableCell>
+                                                <TableCell className="text-right space-x-2">
+                                                    {/* Preview PDF Button - Only during fee verification (2nd approval) */}
+                                                    {user?.role === "PRINCIPAL" && req.status === "PENDING_FEES_VERIFICATION" && (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={async () => {
+                                                                try {
+                                                                    const token = localStorage.getItem("token");
+                                                                    const res = await fetch(`${API_BASE_URL}/bonafide/${req.id}/download`, {
+                                                                        headers: { Authorization: `Bearer ${token}` }
+                                                                    });
+                                                                    if (res.ok) {
+                                                                        const blob = await res.blob();
+                                                                        const url = window.URL.createObjectURL(blob);
+                                                                        window.open(url, '_blank');
+                                                                    }
+                                                                } catch (err) {
+                                                                    console.error("Preview failed");
+                                                                }
+                                                            }}
+                                                        >
+                                                            Preview PDF
+                                                        </Button>
+                                                    )}
+
+                                                    <Button
+                                                        variant="default"
+                                                        className="bg-green-600 hover:bg-green-700"
+                                                        size="sm"
+                                                        onClick={() => handleApprove(req.id)}
+                                                        disabled={processing === req.id}
+                                                    >
+                                                        {processing === req.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Approve"}
+                                                    </Button>
+
+                                                    <Dialog>
+                                                        <DialogTrigger asChild>
+                                                            <Button variant="destructive" size="sm" disabled={processing === req.id}>Reject</Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent>
+                                                            <DialogHeader>
+                                                                <DialogTitle>Reject Request</DialogTitle>
+                                                                <DialogDescription>Please provide a reason for rejection.</DialogDescription>
+                                                            </DialogHeader>
+                                                            <Textarea
+                                                                placeholder="Reason for rejection..."
+                                                                value={rejectReason}
+                                                                onChange={(e) => setRejectReason(e.target.value)}
+                                                            />
+                                                            <DialogFooter>
+                                                                <Button variant="destructive" onClick={() => handleReject(req.id)} disabled={!rejectReason || processing === req.id}>
+                                                                    Confirm Rejection
+                                                                </Button>
+                                                            </DialogFooter>
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </>
                     )}
                 </CardContent>
             </Card>

@@ -76,14 +76,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 p-8 overflow-y-auto">
-                <header className="mb-8 flex items-center justify-between">
+            <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto">
+                <header className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-                        <p className="text-gray-500">Welcome back, {user.fullName}</p>
+                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
+                        <p className="text-sm md:text-base text-gray-500">Welcome back, {user.fullName}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium">
+                        <div className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
                             {user.role}
                         </div>
                     </div>

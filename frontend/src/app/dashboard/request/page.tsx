@@ -110,7 +110,7 @@ export default function RequestBonafidePage() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto">
+        <div className="w-full max-w-2xl mx-auto">
             <Card>
                 <CardHeader>
                     <CardTitle>New Bonafide Certificate Request</CardTitle>
